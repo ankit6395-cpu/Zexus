@@ -10,7 +10,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v3
         with: {gradle-version: 8.7}
       - run: ls *.zip | sort | while read -r z; do unzip -qo "$z"; done
-      - run: cd zexus-android && gradle assembleDebug --no-daemon
+      - name: build
+        run: |
+          cd zexus-android
+          gradle assembleDebug --no-daemon > ../b.log 2>&1 || { grep -E "^e: |wrong|Execution failed|error:" ../b.log | head -10 | while read -r l; do echo "::error::$l"; done; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: zexus-apk
